@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProductController extends Controller
 {
@@ -16,7 +18,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return new ProductResource($this->product->all());
+        return new ProductCollection($this->product->paginate(10));
     }
 
     /**
@@ -24,6 +26,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        if(!$request->user()->tokenCan('store')) abort(401, 'Unauthorized');
         return \App\Models\Product::create($request->all());
     }
 
@@ -32,6 +35,9 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        $product = $this->product->find($product);
+        if(!$product) throw new NotFoundHttpException('Produto não encontrado');
+
         return new ProductResource($product->load('categories'));
     }
 
@@ -40,6 +46,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        if (!$request->user()->tokenCan('update')) abort(401, 'Unauthorized');
         $product->update($request->all());
 
         return $product;
