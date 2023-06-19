@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\API\ProductPutRequest;
+use App\Http\Requests\API\ProductStoreRequest;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProductController extends Controller
 {
@@ -24,19 +24,20 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProductStoreRequest $request)
     {
         if(!$request->user()->tokenCan('store')) abort(401, 'Unauthorized');
-        return \App\Models\Product::create($request->all());
+
+        return new ProductResource(\App\Models\Product::create($request->all()));
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($product)
     {
         $product = $this->product->find($product);
-        if(!$product) throw new NotFoundHttpException('Produto não encontrado');
+        if(!$product) abort(404, 'Produto não encontrado');
 
         return new ProductResource($product->load('categories'));
     }
@@ -44,12 +45,13 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductPutRequest $request, Product $product)
     {
-        if (!$request->user()->tokenCan('update')) abort(401, 'Unauthorized');
+        if(!$request->user()->tokenCan('update')) abort(401, 'Unauthorized');
+
         $product->update($request->all());
 
-        return $product;
+       return new ProductResource($product);
     }
 
     /**
@@ -58,6 +60,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
-        return $product->name;
+
+        return response()->json([], 204);
     }
 }

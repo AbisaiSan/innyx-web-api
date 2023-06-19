@@ -9,7 +9,10 @@ use Illuminate\Http\Request;
 class ProductCategoryController extends Controller
 {
     //api/products/{product}/categories
-    public function index(Product $product) {
-        return $product->categories;
+    public function index(Product $product) 
+    {
+        return response()->json([
+            'data' => $product->categories
+        ]);
     }
 }
