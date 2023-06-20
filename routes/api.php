@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+        return $request->user();
 });
 
 /**
@@ -26,9 +26,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  * DELETE / products/:id
  */
 
-Route::apiResource('products', \App\Http\Controllers\API\ProductController::class)
-        ->only('index');
-
 Route::apiResource('products.categories', \App\Http\Controllers\API\ProductCategoryController::class)
         ->only('index');
 
@@ -37,9 +34,7 @@ Route::apiResource('products.photos', \App\Http\Controllers\API\ProductPhotosCon
         ->middleware('auth:sanctum');
 
 Route::apiResource('products', \App\Http\Controllers\API\ProductController::class)
-        ->only(['store', 'update', 'destroy'])
         ->middleware('auth:sanctum');
 
 Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
 Route::post('/logout', [\App\Http\Controllers\API\AuthController::class, 'logout'])->middleware('auth:sanctum');
-

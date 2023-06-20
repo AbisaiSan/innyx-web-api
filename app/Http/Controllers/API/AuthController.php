@@ -8,15 +8,15 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function login(Request $request) 
+    public function login(Request $request)
     {
         $credentials = $request->only(['email', 'password']);
 
-        if(!auth()->attempt($credentials)) abort(401, 'Invalid Credentials');
-
+        if (!auth()->attempt($credentials)) abort(401, 'Invalid Credentials');
+        $expires = (Carbon::now())->addHours(2);
         return response()->json(([
             'data' => [
-                'token' => auth()->user()->createToken('default')->plainTextToken
+                'token' => auth()->user()->createToken('default', ['*'], $expires)->plainTextToken
             ]
         ]));
     }
@@ -27,5 +27,4 @@ class AuthController extends Controller
 
         return response()->json([], 204);
     }
-
 }
